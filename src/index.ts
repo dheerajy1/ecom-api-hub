@@ -1,4 +1,4 @@
-import { connectDB, disconnectDB } from "@/lib/mongo.js";
+import { connectDB } from "@/lib/mongo.js";
 import { apiRateLimit, openApiAccess, serverGate } from "@/middleware/index.js";
 import { generateOpenAPISpec } from "@/orpc/openapi.js";
 import { orpcRouter } from "@/orpc/router.js";
@@ -151,16 +151,9 @@ app.use(async (req, res, next) => {
 // Database connection
 // ===============================================
 
-await connectDB();
-
-process.on("SIGINT", async () => {
-  await disconnectDB();
-  process.exit(0);
-});
-
-process.on("SIGTERM", async () => {
-  await disconnectDB();
-  process.exit(0);
+app.use(async (_req, _res, next) => {
+  await connectDB();
+  next();
 });
 
 // ===============================================

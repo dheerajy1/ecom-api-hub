@@ -1,0 +1,15 @@
+name: Test
+
+on:
+  push:
+    branches: [feature/**, developer, staging]
+  pull_request:
+    branches: [developer, staging, main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test
+    uses: dheerajy1/.github/.github/workflows/test.yml@main

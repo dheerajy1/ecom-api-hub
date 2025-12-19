@@ -1,0 +1,64 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ---------------------------------------------
+      # 1. Checkout repo with full history & tags
+      # ---------------------------------------------
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ---------------------------------------------
+      # 2. set node version
+      # ---------------------------------------------
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # ---------------------------------------------
+      # 3. Setup Bun
+      # ---------------------------------------------
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      # ---------------------------------------------
+      # 4. Cache Bun dependencies
+      # ---------------------------------------------
+      - name: Cache bun dependencies
+        uses: actions/cache@v4
+        id: bun-cache
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lockb') }}
+          restore-keys: ${{ runner.os }}-bun-
+
+      # ---------------------------------------------
+      # 5. Install dependencies via Bun
+      # ---------------------------------------------
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      # ---------------------------------------------
+      # 6. Run semantic-release (Node-compatible)
+      # ---------------------------------------------
+      - name: Run semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bunx semantic-release

@@ -17,8 +17,8 @@ export async function connectDB() {
     console.log("MongoDB connected:", conn.connection.host);
   } catch (error: unknown) {
 
-    console.error("MongoDB connection error:", error);
-    process.exit(1);
+    console.error("MongoDB connection error:", error instanceof Error ? error.message : error);
+    throw new Error("Database connection failed");
   }
 }
 

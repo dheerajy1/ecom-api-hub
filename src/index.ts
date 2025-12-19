@@ -21,6 +21,24 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ===============================================
+// Database connection
+// ===============================================
+
+app.use(async (_req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err: unknown) {
+    console.error("DB init failed:", err);
+    res.status(503).json({
+      success: false,
+      status: 503,
+      message: "Database unavailable",
+    });
+  }
+});
+
+// ===============================================
 // CORS
 // ===============================================
 
@@ -38,6 +56,7 @@ app.use(
       "X-Client-Secret",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    optionsSuccessStatus: 204,
   })
 );
 
@@ -144,15 +163,6 @@ app.use(async (req, res, next) => {
     return;
   }
 
-  next();
-});
-
-// ===============================================
-// Database connection
-// ===============================================
-
-app.use(async (_req, _res, next) => {
-  await connectDB();
   next();
 });
 

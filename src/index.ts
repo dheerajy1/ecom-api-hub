@@ -8,7 +8,10 @@ import { connectDB } from "./lib/mongo.js";
 import { apiRateLimit, openApiAccess, serverGate } from "./middleware/index.js";
 import { generateOpenAPISpec } from "./orpc/openapi.js";
 import { orpcRouter } from "./orpc/router.js";
-import { aboutRouter, healthzRouter, homeRouter, loginRouter } from "./routes/index.js";
+import aboutRouter from "./routes/about.js";
+import healthzRouter from "./routes/healthz.js";
+import homeRouter from "./routes/home.js";
+import loginRouter from "./routes/login.js";
 
 const app = express();
 

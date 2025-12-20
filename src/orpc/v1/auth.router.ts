@@ -1,7 +1,7 @@
-import { login } from "@/orpc/v1/auth/login.js";
-import { logout } from "@/orpc/v1/auth/logout.js";
-import { refreshToken } from "@/orpc/v1/auth/refresh-token.js";
-import { signup } from "@/orpc/v1/auth/signup.js";
+import { login } from "./auth/login.js";
+import { logout } from "./auth/logout.js";
+import { refreshToken } from "./auth/refresh-token.js";
+import { signup } from "./auth/signup.js";
 
 /**
  * Auth routes (public)

@@ -1,14 +1,14 @@
-import { connectDB } from "@/lib/mongo.js";
-import { apiRateLimit, openApiAccess, serverGate } from "@/middleware/index.js";
-import { generateOpenAPISpec } from "@/orpc/openapi.js";
-import { orpcRouter } from "@/orpc/router.js";
-import { aboutRouter, healthzRouter, homeRouter, loginRouter } from "@/routes/index.js";
 import { OpenAPIHandler } from "@orpc/openapi/node";
 import { onError } from "@orpc/server";
 import { apiReference } from "@scalar/express-api-reference";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
+import { connectDB } from "./lib/mongo.js";
+import { apiRateLimit, openApiAccess, serverGate } from "./middleware/index.js";
+import { generateOpenAPISpec } from "./orpc/openapi.js";
+import { orpcRouter } from "./orpc/router.js";
+import { aboutRouter, healthzRouter, homeRouter, loginRouter } from "./routes/index.js";
 
 const app = express();
 

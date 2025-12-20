@@ -23,6 +23,7 @@
 ├── LICENSE
 ├── package.json
 ├── public
+│  ├── favicon.ico
 │  ├── logo.png
 │  └── style.css
 ├── README.md
@@ -77,5 +78,6 @@
 ├── tests
 │  └── github-actions-payloads
 │    └── push.payload.json
+├── Thumbs.db
 ├── tsconfig.json
 └── vercel.json

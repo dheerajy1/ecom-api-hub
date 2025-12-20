@@ -1,6 +1,6 @@
-import { orpcRouter } from "@/orpc/router.js";
 import { OpenAPIGenerator } from "@orpc/openapi";
 import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
+import { orpcRouter } from "./router.js";
 
 export async function generateOpenAPISpec() {
   const generator = new OpenAPIGenerator({

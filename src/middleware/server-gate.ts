@@ -1,8 +1,6 @@
-// src/middleware/internalClient.ts
-import { env } from "@/lib/env.js";
 import type { Request } from "express";
 import { z } from "zod";
-
+import { env } from "../lib/env.js";
 
 // Header schema validation
 const headerSchema = z.object({

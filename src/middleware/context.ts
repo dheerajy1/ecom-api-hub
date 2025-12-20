@@ -1,6 +1,6 @@
-import { withAuthHeadersSchema, withNoAuthHeadersSchema } from "@/types/index.js";
 import { ORPCError, os } from "@orpc/server";
 import type { IncomingHttpHeaders } from "node:http";
+import { withAuthHeadersSchema, withNoAuthHeadersSchema } from "../types/auth.types.js";
 
 /**
  * Protected routes (requires Bearer token)

@@ -1,6 +1,6 @@
-import { withAuth } from "@/middleware/context.js";
-import Cart from "@/models/cart.js";
-import { ClearCartInputSchema, ClearCartResponseSchema } from "@/types/index.js";
+import { withAuth } from "../../../middleware/context.js";
+import Cart from "../../../models/cart.js";
+import { ClearCartInputSchema, ClearCartResponseSchema } from "../../../types/index.js";
 
 /**
  * POST /api/v1/user/cart/clearCart

@@ -1,5 +1,5 @@
-import { withNoAuth } from "@/middleware/index.js";
-import { LogoutInputSchema } from "@/types/index.js";
+import { withNoAuth } from "../../../middleware/index.js";
+import { LogoutInputSchema } from "../../../types/index.js";
 import * as z from "zod";
 
 /**

@@ -1,5 +1,5 @@
-import { withAuthHeadersSchema } from "@/types/auth.types.js";
 import { z } from "zod";
+import { withAuthHeadersSchema } from "./auth.types.js";
 
 export const CartItemSchema = z.object({
   id: z.number(),

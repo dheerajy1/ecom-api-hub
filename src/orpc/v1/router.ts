@@ -1,5 +1,5 @@
-import { authRouter } from "@/orpc/v1/auth.router.js";
-import { cartRouter } from "@/orpc/v1/cart.router.js";
+import { authRouter } from "./auth.router.js";
+import { cartRouter } from "./cart.router.js";
 
 /**
  * v1 oRPC router

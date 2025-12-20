@@ -1,5 +1,5 @@
-import { withNoAuth } from "@/middleware/index.js";
-import { RefreshTokenInputSchema, RefreshTokenResponseSchema } from "@/types/index.js";
+import { withNoAuth } from "../../../middleware/index.js";
+import { RefreshTokenInputSchema, RefreshTokenResponseSchema } from "../../../types/index.js";
 import { ORPCError } from "@orpc/server";
 
 /**

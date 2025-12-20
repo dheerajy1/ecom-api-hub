@@ -1,6 +1,6 @@
-import { withNoAuth } from "@/middleware/index.js";
-import User from "@/models/user.js";
-import { LoginInputSchema, LoginResponseSchema } from "@/types/index.js";
+import { withNoAuth } from "../../../middleware/index.js";
+import User from "../../../models/user.js";
+import { LoginInputSchema, LoginResponseSchema } from "../../../types/index.js";
 import { ORPCError } from "@orpc/server";
 
 /**

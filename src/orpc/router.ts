@@ -1,4 +1,4 @@
-import { v1Router } from "@/orpc/v1/router.js";
+import { v1Router } from "./v1/router.js";
 
 /**
  * Root oRPC router

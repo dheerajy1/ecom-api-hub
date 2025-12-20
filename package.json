@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "build": "tsc --noEmit",
+    "build": "bun build src/index.ts --outfile dist/index.js --target bun",
     "dev": "bun --watch src/server.ts",
     "lint": "eslint . --cache --cache-location .eslintcache"
   },

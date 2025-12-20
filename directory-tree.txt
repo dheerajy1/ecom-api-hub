@@ -12,18 +12,20 @@
 │    └── test.yml
 ├── .gitignore
 ├── .vercel
+│  ├── .env.preview.local
 │  ├── cache
 │  ├── project.json
 │  └── README.txt
 ├── components
-│  ├── about.htm
-│  └── login.htm
 ├── directory-tree.txt
+├── dist
+│  └── index.js
 ├── eslint.config.js
 ├── LICENSE
 ├── package.json
 ├── public
 │  ├── favicon.ico
+│  ├── login.css
 │  ├── logo.png
 │  └── style.css
 ├── README.md
@@ -63,11 +65,11 @@
 │  │    ├── cart.router.ts
 │  │    └── router.ts
 │  ├── routes
-│  │  ├── about.ts
-│  │  ├── healthz.ts
-│  │  ├── home.ts
+│  │  ├── about.tsx
+│  │  ├── healthz.tsx
+│  │  ├── home.tsx
 │  │  ├── index.ts
-│  │  └── login.ts
+│  │  └── login.tsx
 │  ├── server.ts
 │  └── types
 │    ├── auth.types.ts

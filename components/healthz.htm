@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>{title}</title>
+    <link rel="stylesheet" href="/style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <div class="container health">
+      <h1 class="health-title">Health Status</h1>
+
+      <div class="health-card">
+        <div class="health-row">
+          <span class="health-label">App</span>
+          <span class="health-value">running</span>
+        </div>
+
+        <div class="health-row">
+          <span class="health-label">Database</span>
+          <span class="health-value {dbClass}">
+            {dbIcon}
+            {dbStatus}
+          </span>
+        </div>
+
+        <div class="health-row">
+          <span class="health-label">Timestamp</span>
+          <span class="health-value">{timeStamp}</span>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

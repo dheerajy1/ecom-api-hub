@@ -17,9 +17,11 @@
 │  ├── project.json
 │  └── README.txt
 ├── components
+│  ├── about.htm
+│  ├── healthz.htm
+│  ├── home.htm
+│  └── login.htm
 ├── directory-tree.txt
-├── dist
-│  └── index.js
 ├── eslint.config.js
 ├── LICENSE
 ├── package.json
@@ -65,11 +67,11 @@
 │  │    ├── cart.router.ts
 │  │    └── router.ts
 │  ├── routes
-│  │  ├── about.tsx
-│  │  ├── healthz.tsx
-│  │  ├── home.tsx
+│  │  ├── about.ts
+│  │  ├── healthz.ts
+│  │  ├── home.ts
 │  │  ├── index.ts
-│  │  └── login.tsx
+│  │  └── login.ts
 │  ├── server.ts
 │  └── types
 │    ├── auth.types.ts

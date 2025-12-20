@@ -1,5 +1,7 @@
 import { Router } from "express";
+import React from "react";
 import { renderToString } from "react-dom/server";
+import { About } from "../../components/about.js";
 
 const router = Router();
 
@@ -16,42 +18,15 @@ fetching, and caching strategies.
   `.trim(),
 };
 
-type Props = {
-  title: string;
-  heading: string;
-  description: string;
-};
-
-function About({ title, heading, description }: Props): React.ReactElement {
-  return (
-    <html lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <title>{title}</title>
-        <link rel="stylesheet" href="/style.css" />
-      </head>
-
-      <body>
-        <div className="container about">
-          <h1 className="about-title">{heading}</h1>
-
-          <p className="about-text">{description}</p>
-        </div>
-      </body>
-    </html>
-  );
-}
-
 // about
 router.get("/", async (_req, res) => {
   try {
-    const html = renderToString(
-      <About
-        title={ABOUT_CONTENT.title}
-        heading={ABOUT_CONTENT.heading}
-        description={ABOUT_CONTENT.description}
-      />
-    );
+    const html = renderToString(React.createElement(
+      About, {
+      title: ABOUT_CONTENT.title,
+      heading: ABOUT_CONTENT.heading,
+      description: ABOUT_CONTENT.description,
+    }));
 
     return res.type("html").send("<!DOCTYPE html>" + html);
   } catch (err: unknown) {

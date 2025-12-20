@@ -1,15 +1,10 @@
-import { Router } from "express";
-import { renderToString } from "react-dom/server";
-
-const router = Router();
-
 import React from "react";
 
 type Props = {
   bunVersion: string;
 };
 
-function HomePage({ bunVersion }: Props): React.ReactElement {
+export function HomePage({ bunVersion }: Props): React.ReactElement {
   return (
     <html>
       <head>
@@ -42,16 +37,3 @@ function HomePage({ bunVersion }: Props): React.ReactElement {
     </html>
   );
 }
-
-router.get("", (_req, res) => {
-  try {
-    const html = renderToString(<HomePage bunVersion={process.versions.bun} />);
-
-    return res.type("html").send("<!DOCTYPE html>" + html);
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : "Server error";
-    return res.status(500).json({ message: msg });
-  }
-});
-
-export default router;

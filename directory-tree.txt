@@ -17,10 +17,10 @@
 │  ├── project.json
 │  └── README.txt
 ├── components
-│  ├── About.tsx
-│  ├── Healthz.tsx
-│  ├── Home.tsx
-│  └── Login.tsx
+│  ├── about.htm
+│  ├── healthz.htm
+│  ├── home.htm
+│  └── login.htm
 ├── directory-tree.txt
 ├── eslint.config.js
 ├── LICENSE

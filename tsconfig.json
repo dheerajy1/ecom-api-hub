@@ -1,13 +1,9 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
+    "target": "ESNext",
     "module": "NodeNext",
-    "jsx": "react-jsx",
-    "outDir": "dist",
-    "rootDir": ".",
-    "moduleResolution": "NodeNext",
-    "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["bun"],
   },
-  "include": ["src", "components"]
+  "exclude": ["node_modules"]
 }

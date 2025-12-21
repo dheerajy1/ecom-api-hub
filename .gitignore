@@ -151,7 +151,6 @@ vite.config.ts.timestamp-*
 # misc
 .DS_Store
 .vercel
-Thumbs.db
 
 # ESLint
 .eslintcache

@@ -1,7 +1,7 @@
-import { ORPCError } from "@orpc/server";
 import { withNoAuth } from "../../../middleware/index.js";
 import User from "../../../models/user.js";
 import { LoginInputSchema, LoginResponseSchema } from "../../../types/index.js";
+import { ORPCError } from "@orpc/server";
 
 /**
  * POST /api/v1/auth/user/login

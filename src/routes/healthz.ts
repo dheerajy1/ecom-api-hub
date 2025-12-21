@@ -1,25 +1,11 @@
 import crypto from "crypto";
 import { Router } from "express";
-import fs from "fs";
 import mongoose from "mongoose";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import React from "react";
+import { renderToString } from "react-dom/server";
+import { Healthz } from "../../components/Healthz.js";
 
 const router = Router();
-
-// Pre-load the HTML template once
-const filePath = path.join(__dirname, "../../components/healthz.htm");
-let healthTemplate: string;
-
-try {
-    healthTemplate = fs.readFileSync(filePath, "utf8");
-} catch (err) {
-    console.error("Failed to load healthz.htm:", err);
-    healthTemplate = "<h1>Health template missing</h1>";
-}
 
 router.get("/", async (req, res) => {
     try {
@@ -35,44 +21,28 @@ router.get("/", async (req, res) => {
         const timestamp = new Date().toLocaleString();
         const isoTimestamp = new Date().toISOString();
 
-        // Inline SVG icons with correct classes
-        let dbIcon = "";
-        let dbClass = "";
-
-        if (dbStatus === "connected") {
-            dbIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon success">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="m9 12 2 2 4-4"/>
-                </svg>`;
-            dbClass = "connected";
-        } else if (dbStatus === "connecting") {
-            dbIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon warning">
-                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/>
-                  <path d="M12 9v4"/>
-                  <path d="M12 17h.01"/>
-                </svg>`;
-            dbClass = "connecting";
-        } else {
-            dbIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon error">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="m15 9-6 6"/>
-                  <path d="m9 9 6 6"/>
-                </svg>`;
-            dbClass = dbStatus;
-        }
-
-        // Generate ETag from current health state (changes when DB status changes)
         const etagContent = dbStatus + timestamp;
         const etag = `"${crypto.createHash("md5").update(etagContent).digest("hex")}"`;
 
-        // === HTML Response (Browser) - With Caching ===
+        // HTML Response (Browser) - With Caching
         if (req.headers.accept?.includes("text/html")) {
-            const rendered = healthTemplate
-                .replace("{title}", "Health Check | Ecom API Hub")
-                .replace("{dbClass}", dbClass)
-                .replace("{dbIcon}", dbIcon)
-                .replace("{dbStatus}", dbStatus)
-                .replace("{timeStamp}", timestamp);
+            const htmlTemplate = renderToString(
+                React.createElement(Healthz, {
+                    title: "Health Check | Ecom API Hub",
+                    response: {
+                        success: true,
+                        statusCode: 200,
+                        message: "Health check OK",
+                        data: {
+                            app: "running",
+                            db: statusMap[dbState],
+                            timestamp: isoTimestamp,
+                        },
+                    },
+                })
+            );
+
+            const rendered = "<!DOCTYPE html>" + htmlTemplate;
 
             res.set({
                 "Content-Type": "text/html; charset=utf-8",
@@ -80,11 +50,11 @@ router.get("/", async (req, res) => {
                 "ETag": etag,
             });
 
-            // If ETag matches, browser will get 304 automatically
-            return res.send(rendered);
+            return res.type("html").send(rendered);
+
         }
 
-        // === JSON Response (API clients, monitoring) - No Caching ===
+        // JSON Response (API clients, monitoring) - No Caching
         res.set({
             "Cache-Control": "no-store, no-cache, must-revalidate, private",
         });

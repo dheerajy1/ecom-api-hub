@@ -1,9 +1,12 @@
 {
   "compilerOptions": {
     "target": "ESNext",
+    "jsx": "react-jsx",
     "module": "NodeNext",
     "skipLibCheck": true,
-    "types": ["bun"],
+    "types": [
+      "node"
+    ],
   },
   "exclude": ["node_modules"]
 }

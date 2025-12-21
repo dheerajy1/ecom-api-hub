@@ -3,10 +3,11 @@
   "description": "Express backend serving ecom api hub",
   "version": "0.0.0",
   "type": "module",
-   "author": "",
+  "author": "dheerajy1",
   "license": "ISC",
   "scripts": {
-    "build": "tsc --noEmit",
+    "build": "tsc",
+    "start": "node dist/src/index.js",
     "dev": "bun --watch src/server.ts",
     "lint": "eslint . --cache --cache-location .eslintcache"
   },

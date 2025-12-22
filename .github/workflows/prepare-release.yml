@@ -1,0 +1,229 @@
+name: Prepare release
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  prepare-release:
+    if: |
+      github.event.issue.pull_request != '' &&
+      contains(github.event.comment.body, '/prepare-release')
+    runs-on: ubuntu-latest
+    steps:
+
+      # ---------------------------------------------
+      # 1. Get PR details
+      # ---------------------------------------------
+      - name: Get PR details
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+
+            core.setOutput('head_ref', pr.data.head.ref);
+            core.setOutput('base_ref', pr.data.base.ref);
+            core.setOutput('head_sha', pr.data.head.sha);
+
+            console.log(`PR from: ${pr.data.head.ref} → ${pr.data.base.ref}`);
+
+      # ---------------------------------------------
+      # 2. Check PR source/target branches
+      # ---------------------------------------------
+      - name: Check PR source/target branches
+        run: |
+          if [ "${{ steps.pr.outputs.head_ref }}" != "staging" ] || [ "${{ steps.pr.outputs.base_ref }}" != "main" ]; then
+            echo "::error::This workflow only works on PRs from staging to main"
+            echo "[log] Current PR: ${{ steps.pr.outputs.head_ref }} to ${{ steps.pr.outputs.base_ref }}"
+            exit 1
+          else
+            echo "::notice::PR branches valid: ${{ steps.pr.outputs.head_ref }} to ${{ steps.pr.outputs.base_ref }}"
+          fi
+
+      # ---------------------------------------------
+      # 3. Checkout PR branch with full history
+      # ---------------------------------------------
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.pr.outputs.head_ref }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ---------------------------------------------
+      # 4. Merge latest main into staging for tag visibility
+      # ---------------------------------------------
+      - name: Merge latest main into staging for tag visibility
+        run: |
+          git config user.name "dheerajy1"
+          git config user.email "yssdhiraj@gmail.com"
+          git fetch origin main
+          git merge origin/main --no-ff --no-edit || true  # || true skips if up-to-date
+          echo "[log] Merged main into staging; now HEAD includes new version tag ancestry"
+
+      # ---------------------------------------------
+      # 5. Fetch tags for semantic-release
+      # ---------------------------------------------
+      - name: Fetch tags for semantic-release
+        run: |
+          git fetch --tags
+
+      # ---------------------------------------------
+      # 6. Setup Node.js
+      # ---------------------------------------------
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # ---------------------------------------------
+      # 7. Setup Bun runtime
+      # ---------------------------------------------
+      - name: Setup Bun runtime
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      # ---------------------------------------------
+      # 8. Cache Bun global store
+      # ---------------------------------------------
+      - name: Cache Bun global store
+        uses: actions/cache@v4
+        id: bun-cache
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lockb') }}
+          restore-keys: ${{ runner.os }}-bun-
+
+      # ---------------------------------------------
+      # 9. Install project dependencies
+      # ---------------------------------------------
+      - name: Install project dependencies
+        run: bun install --frozen-lockfile
+
+      # ---------------------------------------------
+      # 10. Determine next semantic version
+      # ---------------------------------------------
+      - name: Determine next semantic version
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          CURRENT_BRANCH="${{ steps.pr.outputs.head_ref }}"
+          echo "[log] Checking version for branch: $CURRENT_BRANCH"
+
+          export GITHUB_REF="refs/heads/$CURRENT_BRANCH"
+
+          bunx semantic-release --no-ci --dry-run --branches "$CURRENT_BRANCH" > release-output.txt 2>&1 || true
+
+          cat release-output.txt
+
+          if grep -qi "next release version is" release-output.txt; then
+            VERSION=$(grep -oiE "next release version is [0-9]+\.[0-9]+\.[0-9]+" release-output.txt | awk '{print $5}')
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      # ---------------------------------------------
+      # 11. Generate version and changelog updates
+      # ---------------------------------------------
+      - name: Generate version and changelog updates
+        if: steps.check.outputs.has_changes == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm version ${{ steps.check.outputs.version }} --no-git-tag-version --allow-same-version
+          bunx conventional-changelog-cli -p angular -i CHANGELOG.md -s
+
+      # ---------------------------------------------
+      # 12. Import GPG key for signed commits
+      # ---------------------------------------------
+      - name: Import GPG key for signed commits
+        if: steps.check.outputs.has_changes == 'true'
+        env:
+          GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
+        run: |
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" > /tmp/gpg-private.asc
+          echo "${{ secrets.GPG_PASSPHRASE }}" | gpg --batch --yes --no-tty --passphrase-fd 0 --import /tmp/gpg-private.asc
+          rm /tmp/gpg-private.asc
+
+          cat > /tmp/gpg-wrapper.sh << 'EOF'
+          #!/bin/bash
+          exec gpg --batch --yes --no-tty --pinentry-mode loopback --passphrase "${GPG_PASSPHRASE}" "$@"
+          EOF
+          chmod +x /tmp/gpg-wrapper.sh
+
+          gpg --list-secret-keys --keyid-format LONG | grep "$GPG_KEY_ID" || (echo "::error::Key import failed!" && exit 1)
+
+          echo "GPG_WRAPPER=/tmp/gpg-wrapper.sh" >> $GITHUB_ENV
+          echo "KEYID=$GPG_KEY_ID" >> $GITHUB_ENV
+
+      # ---------------------------------------------
+      # 13. Create signed release branch and commit
+      # ---------------------------------------------
+      - name: Create signed release branch and commit
+        if: steps.check.outputs.has_changes == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.check.outputs.version }}
+          KEYID: ${{ env.KEYID }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          git config --global user.name "dheerajy1"
+          git config --global user.email "yssdhiraj@gmail.com"
+          git config --global gpg.program "${{ env.GPG_WRAPPER }}"
+          git config --global user.signingkey "$KEYID"
+          git config --global commit.gpgsign true
+          
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
+
+          BRANCH_NAME="patch-release-${VERSION}"
+          git checkout -b "$BRANCH_NAME"
+
+          git add package.json CHANGELOG.md
+          git commit -S -m "chore: changelog updates and version bump ${VERSION}" || exit 0
+          git push -u origin "$BRANCH_NAME"
+
+      # ---------------------------------------------
+      # 14. Create pull request for release
+      # ---------------------------------------------
+      - name: Create pull request for release
+        if: steps.check.outputs.has_changes == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.check.outputs.version }}
+          BASE_BRANCH: ${{ steps.pr.outputs.head_ref }}
+        run: |
+          BRANCH_NAME="patch-release-${VERSION}"
+
+          gh pr create \
+            --base "$BASE_BRANCH" \
+            --head "$BRANCH_NAME" \
+            --title "chore: changelog updates and version bump ${VERSION}" \
+            --body "Automated chore PR for version ${VERSION}. Includes version bump and changelog updates."
+
+      # ---------------------------------------------
+      # 15. Summary
+      # ---------------------------------------------
+      - name: Summary
+        run: |
+          if [ "${{ steps.check.outputs.has_changes }}" = "true" ]; then
+            echo "## Patch Release PR Created" >> $GITHUB_STEP_SUMMARY
+            echo "Version: \`${{ steps.check.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "Status: Ready for manual merge" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## No Release Needed" >> $GITHUB_STEP_SUMMARY
+            echo "No releasable commits found." >> $GITHUB_STEP_SUMMARY
+          fi
+

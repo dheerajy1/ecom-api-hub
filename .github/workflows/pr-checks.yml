@@ -44,8 +44,8 @@ jobs:
         run: |
           BRANCH="${{ github.head_ref }}"
           echo "[log] Head branch: $BRANCH"
-          if [[ "$BRANCH" != feature/* && "$BRANCH" != developer && "$BRANCH" != patch-release-* && "$BRANCH" != staging && "$BRANCH" != main ]]; then
-            echo "::error::Invalid branch name. Allowed patterns: feature/*, developer, staging, main"
+          if [[ "$BRANCH" != feat/* && "$BRANCH" != developer && "$BRANCH" != patch-release-* && "$BRANCH" != staging && "$BRANCH" != main ]]; then
+            echo "::error::Invalid branch name. Allowed patterns: feat/*, developer, staging, main"
             exit 1
           fi
           echo "::notice::Branch name valid: $BRANCH"

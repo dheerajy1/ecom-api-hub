@@ -2,7 +2,7 @@ name: PR checks
 
 on:
   pull_request:
-    types: [opened]
+    types: [opened, edited]
     branches: [developer, staging, main]
 
 permissions:
